@@ -1,5 +1,5 @@
-def HierarchicalPlanning():
-    prompt = """
+def HierarchicalPlanning(historical_trajectory, future_trajecotry):
+    prompt = f"""
     Please analyze the bird's-eye view (BEV) image, paying special attention to the plotted trajectory, and provide a structured output for meta-actions and decision description:
 
     # Meta-actions ($A$):
@@ -13,6 +13,10 @@ def HierarchicalPlanning():
     1. **Action ($A$)**: The specific meta-action, such as 'turn', 'accelerate', or 'stop'.
     2. **Subject ($S$)**: The interacting object or lane involved, such as a pedestrian, vehicle, or lane.
     3. **Duration ($D$)**: Specify the time frame for the action, including how long it should last or when it should begin.
+
+    To help you give precise description, we provide the exact historical trajectory and future trajectory of the ego vehicle in the image. The historical trajectory is represented as a sequence of waypoints in the form of (x, y, z, yaw, velocity, velocity_yaw, acceleration, ) coordinates. The future trajectory is represented as a sequence of waypoints in the form of (x, y, z, yaw) coordinates. You can use this information to infer the driving decisions and actions.
+    Historical Trajectory: {historical_trajectory} (-2s, -1s, -0.5s, 0s)
+    Future Trajectory: {future_trajecotry} (0s-8s, frequency: 10Hz)
 
     your output format should be a json object with the following structure:
     {

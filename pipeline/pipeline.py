@@ -9,8 +9,11 @@ from functools import partial
 from utils import save_raster
 
 from prompt.HierarchicalPlanning import HierarchicalPlanning
+from prompt.SceneAnalysis import SceneAnalysis
+from prompt.SceneDescription import SceneDescription
+from utils import pic_path
 
-def planning(index_root, split, data_scale, data_root, map_root, new_data_root):
+def data_annotation(index_root, split, data_scale, data_root, new_data_root):
     dataset = load_dataset(index_root, split, dataset_scale=data_scale)
 
     from map.map import return_map_dic
@@ -27,20 +30,26 @@ def planning(index_root, split, data_scale, data_root, map_root, new_data_root):
         save_raster(sample, 0, file_index=i, path_to_save="./raster")
         high_res_image_path = os.path.join("./raster", f"test_{i}_0_high_res_raster.png")
         low_res_image_path = os.path.join("./raster", f"test_{i}_0_low_res_raster.png")
-        response = qwen_api(high_res_image_path, HierarchicalPlanning(sample["context_actions"], sample["trajectory_label"]))
-        print(response)
+        planning = qwen_api(high_res_image_path, HierarchicalPlanning(sample["context_actions"], sample["trajectory_label"]))
         index = sample["index"]
-        index["planning"] = response
+        index["planning"] = planning
+
+        img_path = pic_path(index["images_path"])
+        description = qwen_api(img_path, SceneDescription())
+        index["description"] = description
+
+        prediction = qwen_api(img_path, SceneAnalysis())
+        index["prediction"] = prediction
+        
         indexes.append(index)
     new_dataset = Dataset.from_list(indexes)
     new_dataset.save_to_disk(os.path.join(new_data_root, split))
     
 if __name__ == "__main__":
-    planning(index_root="/cephfs/shared/nuplan/online_s6/index",
+    data_annotation(index_root="/home/zhanjh/data/index",
                     split="test",
-                    data_scale=1,
-                    data_root="/cephfs/shared/nuplan/online_s6",
-                    map_root="/cephfs/shared/nuplan/online_s6/map",
-                    new_data_root="/cephfs/shared/DataGen",
+                    data_scale=0.01,
+                    data_root="/home/zhanjh/nuplan/online_s6",
+                    new_data_root="/home/data/DataGen",
                     )
     
