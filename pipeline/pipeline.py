@@ -38,5 +38,11 @@ def data_annotation(index_root, split, data_scale, data_root, map_root, new_data
     new_dataset.save_to_disk(os.path.join(new_data_root, split))
     
 if __name__ == "__main__":
-    NotImplementedError
+    data_annotation(index_root="/cephfs/shared/nuplan/online_s6/index",
+                    split="test",
+                    data_scale=1,
+                    data_root="/cephfs/shared/nuplan/online_s6",
+                    map_root="/cephfs/shared/nuplan/online_s6/map",
+                    new_data_root="/cephfs/shared/DataGen",
+                    )
     
