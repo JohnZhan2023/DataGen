@@ -39,7 +39,7 @@ def nuplan_rasterize_collate_func(batch, dic_path=None, autoregressive=False, **
         padded_tensors[key] = torch.nn.utils.rnn.pad_sequence(tensors, batch_first=True, padding_value=-1)
         for i, _ in enumerate(batch):
             batch[i][key] = padded_tensors[key][i]
-    print("begin rasterizing")
+
     # online rasterize
     if autoregressive:
         map_func = partial(autoregressive_rasterize, data_path=dic_path, **encode_kwargs)

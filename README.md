@@ -1,4 +1,7 @@
 # Design of Dataset
+## Example Pic
+![sampled fpv](pic/0a04b286e2dd5602.jpg)
+
 
 ## Scene Description (input: sensor)
 ### Environment Description
@@ -19,6 +22,37 @@ In addition to environmental conditions, identifying critical objects in the dri
 
 These attributes are mapped to language token IDs, enabling integration with subsequent modules.
 
+```json
+{
+    "E_weather": "overcast",
+    "E_time": "daytime",
+    "E_road": "urban road",
+    "E_lane": "middle lane",
+    "Critical_Objects": [
+        {
+            "Category": "vehicle",
+            "BoundingBox": [350, 480, 410, 580],
+            "Description": "Truck driving towards the camera."
+        },
+        {
+            "Category": "vehicle",
+            "BoundingBox": [670, 510, 770, 610],
+            "Description": "Van parked on the right side of the road."
+        },
+        {
+            "Category": "vehicle",
+            "BoundingBox": [530, 500, 580, 560],
+            "Description": "Truck parked on the right side of the road."
+        },
+        {
+            "Category": "pedestrian",
+            "BoundingBox": [580, 520, 600, 580],
+            "Description": "Person standing near the parked vehicles."
+        }
+    ]
+}
+```
+
 ## Scene Analysis (input: sensor)
 The scene analysis module provides a comprehensive understanding of the driving environment and critical objects. 
 
@@ -27,6 +61,27 @@ Critical objects are analyzed from three perspectives:
 - **Static attributes ($C_s$)**: Properties like the visual cues of roadside billboards or the oversized cargo of a truck.
 - **Motion states ($C_m$)**: Describes the object's dynamics, such as position, direction, and action.
 - **Particular behaviors ($C_b$)**: Refers to special actions, like a pedestrian's gesture, that could influence the ego vehicle's next decision.
+```json
+{
+    "Scene_Summary": "The ego vehicle is driving on a city street with construction activity on the right side. The road is clear, and the weather appears to be overcast. There are several vehicles, including a truck with oversized cargo, and construction workers present.",
+    
+    "Critical_Objects": [
+        {
+            "Category": "vehicle",
+            "Static_Attributes": "Truck with oversized cargo",
+            "Motion_States": "Moving forward",
+            "Particular_Behaviors": "No special actions observed"
+        },
+        {
+            "Category": "construction_worker",
+            "Static_Attributes": "Wearing high-visibility clothing",
+            "Motion_States": "Standing near the construction site",
+            "Particular_Behaviors": "No special actions observed"
+        }
+    ]
+}
+```
+
 
 ## Hierarchical Planning (input: bev and trajectory)
 Once the scene-level summary is generated, it is combined with the route, ego vehicle's pose, and velocity to inform planning. Planning occurs in three stages:

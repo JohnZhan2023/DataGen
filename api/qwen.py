@@ -2,6 +2,10 @@ from openai import OpenAI
 import os
 import base64
 import json
+import sys
+sys.path.append("/home/zhanjh/workspace/DataGen/")
+from prompt.SceneDescription import SceneDescription
+from prompt.SceneAnalysis import SceneAnalysis
 
 #  base 64 format
 def encode_image(image_path):
@@ -39,5 +43,5 @@ def qwen_api(image_path,text, model="qwen-vl-max-0809"):
     return result["choices"][0]["message"]["content"]
 
 if __name__=='__main__':
-    response = qwen_api("pic/image.png","describe the image")
+    response = qwen_api("pic/0a04b286e2dd5602.jpg",SceneAnalysis())
     print(response)

@@ -10,19 +10,15 @@ from utils import save_raster
 
 def data_annotation(index_root, split, data_scale, data_root, map_root, new_data_root):
     dataset = load_dataset(index_root, split, dataset_scale=data_scale)
-    all_maps_dic = {}
-    map_folder = os.path.join(map_root, 'map')
-    for each_map in os.listdir(map_folder):
-        if each_map.endswith('.pkl'):
-            map_path = os.path.join(map_folder, each_map)
-            with open(map_path, 'rb') as f:
-                map_dic = pickle.load(f)
-            map_name = each_map.split('.')[0]
-            all_maps_dic[map_name] = map_dic
+
+    from bev.map import return_map_dic
+    all_maps_dic = return_map_dic()
+
     from transformer4planning.preprocess.nuplan_rasterize import nuplan_rasterize_collate_func
     samples = nuplan_rasterize_collate_func(
-        dataset, all_maps_dic, data_root
+        dataset[:100], all_maps_dic, data_root
     )   
+
     indexes = []
     for i in range(len(samples)):
         sample = samples[i]

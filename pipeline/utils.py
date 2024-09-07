@@ -214,3 +214,9 @@ def save_raster(inputs, sample_index, file_index=0,
     print('length of action and labels: ',
           inputs['context_actions'][sample_index].shape)
     print('debug images saved to: ', path_to_save, file_index)
+
+def pic_path(index, view = "CAM_FO"):
+    file_name = index["file_name"]
+    id = index["id"]
+    root = os.get("SENSOR_BLOBS_ROOT")
+    return os.path.join(root, f"{file_name}/{view}/{id}.png")
