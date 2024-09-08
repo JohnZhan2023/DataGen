@@ -16,21 +16,17 @@ def SceneDescription():
         
         your output format should be a json object with the following structure:
         {
-            "E_weather": "sunny",
-            "E_time": "daytime",
-            "E_road": "urban road",
-            "E_lane": "middle lane",
+            "E_weather": $$weather condition$$,
+            "E_time": $$judged by the brightness of the image$$,
+            "E_road": $$road type$$,
+            "E_lane": $$lane positioning and possible maneuvers, in less than 3 words$$,
             "Critical_Objects": [
                 {
-                    "Category": "pedestrian",
-                    "BoundingBox": [x1, y1, x2, y2],
-                    "Description": "Pedestrian crossing the road."
+                    "Category": $$The category of the object which may influence the ego vehicle. You can omit those which won't interact with the wgo vehicle's driving.$$,
+                    "BoundingBox": $$the location of the object on the picture$$,
+                    "Description": $$description of the object$$
                 },
-                {
-                    "Category": "vehicle",
-                    "BoundingBox": [x1, y1, x2, y2],
-                    "Description": "Vehicle making a U-turn."
-                }
+                
             ]
         }
         """

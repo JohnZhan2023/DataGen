@@ -1,15 +1,17 @@
 import os
 import base64
 from datasets.arrow_dataset import Dataset
-
+import sys
+sys.path.append("/home/zhanjh/workspace/DataGen/")
 from api.qwen import qwen_api
+from api.glm import zhipuai_api
 from utils import load_dataset
 import pickle
 from functools import partial
 from utils import save_raster
 
 def analysis(index_root, split, data_scale, new_data_root):
-    dataset = load_dataset(index_root, split, dataset_scale=data_scale)
+    dataset = load_dataset(index_root, split, dataset_scale=data_scale, select=True)
 
     indexes = []
     for data in dataset:
@@ -17,7 +19,8 @@ def analysis(index_root, split, data_scale, new_data_root):
         img_path = pic_path(data["images_path"])
         from prompt.SceneAnalysis import SceneAnalysis
         response = qwen_api(img_path, SceneAnalysis())
-        data["description"] = response
+        data["prediction"] = response
+        print(response)
         indexes.append(data)
 
     
@@ -25,11 +28,9 @@ def analysis(index_root, split, data_scale, new_data_root):
     new_dataset.save_to_disk(os.path.join(new_data_root, split))
     
 if __name__ == "__main__":
-    analysis(index_root="/cephfs/shared/nuplan/online_s6/index",
-                    split="test",
-                    data_scale=1,
-                    data_root="/cephfs/shared/nuplan/online_s6",
-                    map_root="/cephfs/shared/nuplan/online_s6/map",
-                    new_data_root="/cephfs/shared/DataGen",
+    analysis(index_root="/home/zhanjh/data/index",
+                    split="val",
+                    data_scale=0.00001,
+                    new_data_root="/home/zhanjh/data/DataGen",
                     )
     

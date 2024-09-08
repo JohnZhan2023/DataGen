@@ -1,6 +1,9 @@
 # Design of Dataset
 ## Example Pic
-![sampled fpv](pic/0a04b286e2dd5602.jpg)
+![sampled fpv(1920*1080)](pic/ae1965bdc09856ff.jpg)
+1920*1080
+
+![bev](pic/test_0_0_high_res_raster.png)
 
 
 ## Scene Description (input: sensor)
@@ -22,36 +25,6 @@ In addition to environmental conditions, identifying critical objects in the dri
 
 These attributes are mapped to language token IDs, enabling integration with subsequent modules.
 
-```json
-{
-    "E_weather": "overcast",
-    "E_time": "daytime",
-    "E_road": "urban road",
-    "E_lane": "middle lane",
-    "Critical_Objects": [
-        {
-            "Category": "vehicle",
-            "BoundingBox": [350, 480, 410, 580],
-            "Description": "Truck driving towards the camera."
-        },
-        {
-            "Category": "vehicle",
-            "BoundingBox": [670, 510, 770, 610],
-            "Description": "Van parked on the right side of the road."
-        },
-        {
-            "Category": "vehicle",
-            "BoundingBox": [530, 500, 580, 560],
-            "Description": "Truck parked on the right side of the road."
-        },
-        {
-            "Category": "pedestrian",
-            "BoundingBox": [580, 520, 600, 580],
-            "Description": "Person standing near the parked vehicles."
-        }
-    ]
-}
-```
 
 ## Scene Analysis (input: sensor)
 The scene analysis module provides a comprehensive understanding of the driving environment and critical objects. 
@@ -61,26 +34,6 @@ Critical objects are analyzed from three perspectives:
 - **Static attributes ($C_s$)**: Properties like the visual cues of roadside billboards or the oversized cargo of a truck.
 - **Motion states ($C_m$)**: Describes the object's dynamics, such as position, direction, and action.
 - **Particular behaviors ($C_b$)**: Refers to special actions, like a pedestrian's gesture, that could influence the ego vehicle's next decision.
-```json
-{
-    "Scene_Summary": "The ego vehicle is driving on a city street with construction activity on the right side. The road is clear, and the weather appears to be overcast. There are several vehicles, including a truck with oversized cargo, and construction workers present.",
-    
-    "Critical_Objects": [
-        {
-            "Category": "vehicle",
-            "Static_Attributes": "Truck with oversized cargo",
-            "Motion_States": "Moving forward",
-            "Particular_Behaviors": "No special actions observed"
-        },
-        {
-            "Category": "construction_worker",
-            "Static_Attributes": "Wearing high-visibility clothing",
-            "Motion_States": "Standing near the construction site",
-            "Particular_Behaviors": "No special actions observed"
-        }
-    ]
-}
-```
 
 
 ## Hierarchical Planning (input: bev and trajectory)
@@ -108,3 +61,73 @@ $$
 W = \{w_1, w_2, ..., w_n\}, \quad w_i = (x_i, y_i)
 $$
 These waypoints define the vehicle's path over a certain future period with predetermined intervals $\Delta t$.
+
+
+```json
+{
+    "E_weather": "Cloudy",
+    "E_time": "Daytime",
+    "E_road": "Urban road",
+    "E_lane": "Vehicle is in the right lane, approaching an intersection with possible maneuvers to turn left, continue straight, or turn right.",
+    "Critical_Objects": [
+        {
+            "Category": "Vehicle",
+            "BoundingBox": "(915, 450, 1000, 650)",
+            "Description": "A black SUV parked on the right side of the road near the intersection."
+        },
+        {
+            "Category": "Traffic Sign",
+            "BoundingBox": "(755, 330, 805, 360)",
+            "Description": "A street sign indicating the name of the cross street."
+        }
+    ]
+}
+```
+```json
+{
+    "Scene_Summary": "The scene is set during daytime under cloudy weather conditions. The ego vehicle is on an urban road, approaching an intersection from the right lane. The road is clear ahead, and there are no immediate obstacles in the lane of travel. The intersection is marked with pedestrian crosswalks and road markings. To the right, there is a black SUV parked near the intersection, and a street sign indicating the name of the cross street is visible. The overall environment suggests a typical urban setting with potential for various maneuvers at the intersection.",
+    
+    "Critical_Objects": [
+        {
+            "class": "Vehicle",
+            "Characteristics": {
+                "Static attributes": "The black SUV is parked on the right side of the road near the intersection. It is a stationary object with no motion.",
+                "Motion states": "The SUV is not in motion; it is parked and does not pose an immediate threat to the ego vehicle's path.",
+                "Particular behaviors": "There are no particular behaviors observed from the SUV, as it is parked and stationary."
+            },
+            "Influence": "The parked SUV does not directly influence the ego vehicle's immediate path but should be noted for potential future maneuvers, such as turning right or continuing straight."
+        },
+        {
+            "class": "Traffic Sign",
+            "Characteristics": {
+                "Static attributes": "The street sign is located on the right side of the road, indicating the name of the cross street. It is a fixed object providing information about the intersection.",
+                "Motion states": "The street sign is stationary and does not move.",
+                "Particular behaviors": "There are no particular behaviors associated with the street sign, as it is a static object."
+            },
+            "Influence": "The street sign provides important information about the cross street, which can help the ego vehicle in making decisions about its route and maneuvers at the intersection."
+        }
+    ]
+}
+```
+```json
+{
+    "Meta_Actions": [
+        {
+            "Action": "Speed up",
+            "Subject": "Ego vehicle",
+            "Duration": "0s-2s"
+        },
+        {
+            "Action": "Turn right",
+            "Subject": "Ego vehicle",
+            "Duration": "2s-4s"
+        },
+        {
+            "Action": "Maintain speed",
+            "Subject": "Ego vehicle",
+            "Duration": "4s-8s"
+        }
+    ],
+    "Decision_Description": "The ego vehicle should speed up initially to approach the intersection, then turn right to follow the future trajectory, and maintain a consistent speed to safely navigate the new path."
+}
+```
