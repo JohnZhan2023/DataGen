@@ -51,7 +51,7 @@ def data_annotation(index_root, split, data_scale, data_root, new_data_root):
 if __name__ == "__main__":
     data_annotation(index_root="/home/zhanjh/data/index",
                     split="val",
-                    data_scale=0.00001,
+                    data_scale=0.0002,
                     data_root="/home/zhanjh/nuplan/online_s6",
                     new_data_root="/home/zhanjh/data/DataGen",
                     )
