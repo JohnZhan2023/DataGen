@@ -20,8 +20,10 @@ def load_dataset(root, split='train', dataset_scale=1, agent_type="all", select=
     datasets = []
     index_root_folders = os.path.join(root, split)
     indices = os.listdir(index_root_folders)
+    # ['train-index_vegas3', 'train-index_singapore', 'train-index_pittsburgh', 'train-index_vegas2', 'train-index_vegas4', 'train-index_vegas5', 'train-index_boston', 'train-index_vegas1', 'train-index_vegas6']
     if debug:
-        indices = indices[:1]
+        print(indices)
+        indices = indices[1:2]
     for index in indices:
         index_path = os.path.join(index_root_folders, index)
         if os.path.isdir(index_path):
@@ -156,7 +158,7 @@ def save_raster(inputs, sample_index, file_index=0,
                     if 'actions' in each_traj_key:
                         target_image[x, y, :] = [255, 0, 255]
                     elif 'label' in each_traj_key:
-                        target_image[x, y, :] = [255, 255, 0]
+                        target_image[x-1:x+1, y-1:y+1, :] = [255, 255, 255]
 
         tray_point_size = max(2, int(0.75 * scale * 4 / 7 / 20))
         key_point_size = max(2, int(3 * scale * 4 / 7))
@@ -207,10 +209,130 @@ def save_raster(inputs, sample_index, file_index=0,
             #     caption=f"{file_index}-{each_key}"
             # )
             # self.log({"pred examples": images})
-            cv2.imwrite(os.path.join(path_to_save, 'test' + '_' + str(file_index) + '_' + str(sample_index) + '_' + str(each_key) + '.png'), image_to_save[each_key])
+            cv2.imwrite(os.path.join(path_to_save, 'test' + '_' + str(file_index) + '_' + str(sample_index) + '_' + str(each_key) + '.jpg'), image_to_save[each_key])
     else:
         return image_to_save
 
 def pic_path(images_path, num=0):
     root = os.getenv("SENSOR_BLOBS_ROOT")
     return os.path.join(root, images_path[num])
+
+
+def selected_scenario_type():
+    """
+        high_magnitude_speed
+        changing_lane
+        stationary_in_traffic
+        following_lane_with_lead
+        traversing_pickup_dropoff
+        stopping_with_lead
+        low_magnitude_speed
+        starting_straight_intersection_traversal
+        near_multiple_vehicles
+        waiting_for_pedestrian_to_cross
+        high_lateral_acceleration
+        behind_long_vehicle
+        starting_right_turn
+        starting_left_turn
+    """
+    filter_types = [
+            "waiting_for_pedestrian_to_cross",
+            "near_multiple_vehicles",
+            "changing_lane",
+            "starting_right_turn",
+            "behind_long_vehicle",
+            "high_magnitude_speed",
+            "stationary_in_traffic",
+            "following_lane_with_lead",
+            "traversing_pickup_dropoff",
+            "stopping_with_lead",
+            "starting_straight_intersection_traversal",
+            "high_lateral_acceleration",
+            "starting_left_turn",
+            "near_pedestrian_on_crosswalk",
+            "on_stopline_traffic_light",
+            "on_intersection",
+            "on_traffic_light_intersection",
+            "traversing_intersection",
+            "traversing_traffic_light_intersection",
+            "near_construction_zone_sign",
+            "on_pickup_dropoff",
+            "near_pedestrian_at_pickup_dropoff"
+        ]
+    return filter_types
+
+
+# near_pedestrian_on_crosswalk
+# on_stopline_traffic_light
+# on_intersection
+# on_traffic_light_intersection
+# traversing_intersection
+# traversing_traffic_light_intersection
+# near_construction_zone_sign
+# near_multiple_vehicles
+# on_pickup_dropoff
+# traversing_pickup_dropoff
+# 
+from PIL import Image
+def flip_image_horizontally(image_path):
+    """水平翻转图片并返回翻转后的图片路径。"""
+    with Image.open(image_path) as img:
+        flipped_img = img.transpose(Image.FLIP_LEFT_RIGHT)
+        flipped_img_path = image_path.replace('.jpg', '_flipped.jpg')  # 修改文件名
+        flipped_img.save(flipped_img_path)
+    return flipped_img_path
+
+def delete_image(image_path):
+    """删除指定路径的图片。"""
+    if os.path.exists(image_path):
+        os.remove(image_path)
+    else:
+        print(f"Image not found: {image_path}")
+        
+        
+        
+def pose_v_describe(poses, velocity):
+    description=""
+    for pose in poses:
+        description += f"the agent is at the relative place of {pose}(x, y, z, yaw) with a velocity of {velocity}. \n"
+    return description
+from PIL import Image
+def concatenate_images(img_path1, img_path2, save_path):
+    """
+    拼接两张图片，img_path1 在左，img_path2 在右，先调整两张图片的高度使其相同，然后保存到 save_path。
+    """
+    # 打开两张图片
+    image1 = Image.open(img_path1)
+    image2 = Image.open(img_path2)
+
+    # 获取两张图片的尺寸
+    width1, height1 = image1.size
+    width2, height2 = image2.size
+
+    # 确定新的高度为两者之中的最大值
+    new_height = max(height1, height2)
+
+    # 如果两张图片的高度不同，调整高度较小的图片
+    if height1 != new_height:
+        # 计算新的宽度，保持原始宽高比
+        new_width1 = int(new_height * width1 / height1)
+        image1 = image1.resize((new_width1, new_height), Image.Resampling.LANCZOS)
+    if height2 != new_height:
+        # 计算新的宽度，保持原始宽高比
+        new_width2 = int(new_height * width2 / height2)
+        image2 = image2.resize((new_width2, new_height), Image.Resampling.LANCZOS)
+
+    # 获取调整大小后的宽度
+    width1, height1 = image1.size
+    width2, height2 = image2.size
+
+    # 创建一个新的画布，宽度为两张图片宽度之和，高度为调整后的统一高度
+    new_width = width1 + width2
+    new_image = Image.new('RGB', (new_width, new_height))
+
+    # 将两张图片粘贴到新图片上
+    new_image.paste(image1, (0, 0))  # 第一张图片粘贴在左边
+    new_image.paste(image2, (width1, 0))  # 第二张图片粘贴在右边
+
+    # 保存到指定路径
+    new_image.save(save_path)

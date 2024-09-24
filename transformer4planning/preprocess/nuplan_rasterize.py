@@ -114,6 +114,25 @@ def static_coor_rasterize(sample, data_path, raster_shape=(224, 224),
     y_inverse = data_dic["y_inverse"]
 
     assert agent_dic['ego']['starting_frame'] == 0, f'ego starting frame {agent_dic["ego"]["starting_frame"]} should be 0'
+    
+    ############################# Get other vehicles' position and velocity ##########################
+    other_agent_v = []
+    other_agent_position = []
+    for key in agent_dic:
+        if key == 'ego':
+            continue
+        if frame_id>agent_dic[key]["starting_frame"] and frame_id<agent_dic[key]["ending_frame"]:
+            # print("the shape of other_agent_v:", agent_dic[key]['speed'].shape)
+            # print("the shape of other agent pose:",agent_dic[key]["pose"].shape)
+            # print("frame:", frame_id)
+            other_agent_position.append(agent_dic[key]["pose"][(frame_id-agent_dic[key]["starting_frame"]) // frequency_change_rate])
+            if len(agent_dic[key]['speed'])==len(agent_dic[key]['pose']):
+                other_agent_v.append(agent_dic[key]['speed'][(frame_id) // frequency_change_rate])
+            else:
+                other_agent_v.append(agent_dic[key]['speed'][(frame_id-agent_dic[key]["starting_frame"]) // frequency_change_rate])
+
+    ##################################################################################################
+    
 
     # augment frame id
     augment_frame_id = kwargs.get('augment_index', 0)
@@ -302,6 +321,8 @@ def static_coor_rasterize(sample, data_path, raster_shape=(224, 224),
     result_to_return["low_res_raster"] = np.array(rasters_low_res, dtype=bool)
     result_to_return["context_actions"] = np.array(context_actions, dtype=np.float32)
     result_to_return['trajectory_label'] = trajectory_label.astype(np.float32)
+    result_to_return["other_agent_v"] = other_agent_v
+    result_to_return["other_agent_position"] = other_agent_position-origin_ego_pose
 
     del rasters_high_res
     del rasters_low_res
