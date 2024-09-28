@@ -23,7 +23,7 @@ def load_dataset(root, split='train', dataset_scale=1, agent_type="all", select=
     # ['train-index_vegas3', 'train-index_singapore', 'train-index_pittsburgh', 'train-index_vegas2', 'train-index_vegas4', 'train-index_vegas5', 'train-index_boston', 'train-index_vegas1', 'train-index_vegas6']
     if debug:
         print(indices)
-        indices = indices[1:2]
+        indices = indices[2:3]
     for index in indices:
         index_path = os.path.join(index_root_folders, index)
         if os.path.isdir(index_path):
@@ -67,8 +67,8 @@ def load_dataset(root, split='train', dataset_scale=1, agent_type="all", select=
 
     return dataset
 
-
-
+random.seed(203044)
+color_pallet = np.random.randint(0, 255, size=(21, 4)) * 0.5
 def save_raster(inputs, sample_index, file_index=0,
                 prediction_trajectory=None, path_to_save=None,
                 high_scale=4, low_scale=0.77,
@@ -95,38 +95,38 @@ def save_raster(inputs, sample_index, file_index=0,
         each_img = inputs[each_key][sample_index]
         if isinstance(each_img, torch.Tensor):
             each_img = each_img.cpu().numpy()
-        goal = each_img[:, :, 0]
-        road = each_img[:, :, :21]
-        traffic_lights = each_img[:, :, 21:25]
+        goal = each_img[:, :, :2]
+        road = each_img[:, :, 2:22]
+        traffic_lights = each_img[:, :, 22:26]
         agent = each_img[:, :, 25:]
         # generate a color pallet of 20 in RGB space
-        color_pallet = np.random.randint(0, 255, size=(21, 3)) * 0.5
         target_image = np.zeros([each_img.shape[0], each_img.shape[1], 3], dtype=float)
         image_shape = target_image.shape
 
-        for i in range(21):
-            if i in [0, 11]: continue
+        for i in [5, 17, 18, 19]:
             road_per_channel = road[:, :, i].copy()
             # repeat on the third dimension into RGB space
             # replace the road channel with the color pallet
             if np.sum(road_per_channel) > 0:
                 for k in range(3):
                     target_image[:, :, k][road_per_channel == 1] = color_pallet[i, k]
-        for i in [0, 11]:
+        target_image[:, :, :2][goal == 1] = 255
+        for i in range(20):
+            if i in [5, 17, 18, 19]:
+                continue
             road_per_channel = road[:, :, i].copy()
             # repeat on the third dimension into RGB space
             # replace the road channel with the color pallet
             if np.sum(road_per_channel) > 0:
                 for k in range(3):
                     target_image[:, :, k][road_per_channel == 1] = color_pallet[i, k]
-        for i in range(3):
+        for i in range(4):
             traffic_light_per_channel = traffic_lights[:, :, i].copy()
             # repeat on the third dimension into RGB space
             # replace the road channel with the color pallet
             if np.sum(traffic_light_per_channel) > 0:
                 for k in range(3):
                     target_image[:, :, k][traffic_light_per_channel == 1] = color_pallet[i, k]
-        target_image[:, :, 0][goal == 1] = 255
         # generate 9 values interpolated from 0 to 1
         agent_colors = np.array([[0.01 * 255] * past_frames_num,
                                  np.linspace(0, 255, past_frames_num),

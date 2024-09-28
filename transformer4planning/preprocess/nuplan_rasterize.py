@@ -321,8 +321,12 @@ def static_coor_rasterize(sample, data_path, raster_shape=(224, 224),
     result_to_return["low_res_raster"] = np.array(rasters_low_res, dtype=bool)
     result_to_return["context_actions"] = np.array(context_actions, dtype=np.float32)
     result_to_return['trajectory_label'] = trajectory_label.astype(np.float32)
-    result_to_return["other_agent_v"] = other_agent_v
-    result_to_return["other_agent_position"] = other_agent_position-origin_ego_pose
+    if other_agent_position is not None:
+        result_to_return["other_agent_v"] = other_agent_v
+        result_to_return["other_agent_position"] = other_agent_position-origin_ego_pose
+    else:
+        result_to_return["other_agent_v"] = None
+        result_to_return["other_agent_position"] = None
 
     del rasters_high_res
     del rasters_low_res
@@ -683,7 +687,7 @@ def draw_rasters(data_dic, origin_ego_pose, agent_ids,
         simplified_xyz[:, 0] *= y_inverse
         high_res_road = (simplified_xyz * high_res_scale).astype('int32') + raster_shape[0] // 2
         low_res_road = (simplified_xyz * low_res_scale).astype('int32') + raster_shape[0] // 2
-        if road_type in [5, 17, 18, 19]:
+        if road_type in [5, 17, 18, 19]: #[7, 19, 20, 21]
             cv2.fillPoly(rasters_high_res_channels[road_type + route_channel], np.int32([high_res_road[:, :2]]), (255, 255, 255))
             cv2.fillPoly(rasters_low_res_channels[road_type + route_channel], np.int32([low_res_road[:, :2]]), (255, 255, 255))
         else:

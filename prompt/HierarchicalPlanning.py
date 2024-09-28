@@ -14,16 +14,17 @@ def HierarchicalPlanning(historical_trajectory, future_trajecotry):
             - Turning actions: turn left, turn right, turn around
             - Lane-control actions: change lane, shift slightly to the left or right
         Notice that the summed duration of all meta actions should be 8s.
-
+        
+        If the meta-action relates to change lane, you should resort to the given bev image to determine the direction of the lane change. The front direction of the original ego car is the downward direction of the BEV image.
 
         For each meta-action, provide a combined decision description from 3 aspects:
             1. **Action **: The specific meta-action, such as 'turn left', 'turn right', 'accelerate', or 'stop'.
             2. **Subject **: The interacting object or lane involved, such as a pedestrian, vehicle, or lane.
             3. **Duration **: Specify the time frame for the action, including how long it should last like 3s.
-        - Be careful to discriminate the left or right turn, and the lane change to the left or right. 
+        - Be careful to discriminate the left or right turn, and the lane change to the left or right. When necessary, you can resort to the given bev image to determine the direction of the lane change. The front direction of the original ego car is the downward direction of the BEV image.
 
         your output format should be a json object with the following structure:
-        {{  "Description of the Future Trajectory": "$$ Describe points changes and trends.$$",
+        {{  
             "Meta_Actions": [
                 "Action": "$$chosen from meta actions, must base your output on the Description of the Future Trajectory.$$",
                 "Subject": "$$the interacting object or lane involved$$",

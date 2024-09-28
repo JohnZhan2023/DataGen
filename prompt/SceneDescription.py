@@ -21,12 +21,10 @@ def SceneDescription():
         ### Scenario Categories:
         - Based on the scene information, select the category that best matches the scene from the following classifications:
         categories = [
-            "Automatic Emergency Braking",
             "Road Construction",
             "Close-range Cut-ins",
             "Roundabout",
             "Animals Crossing Road",
-            "Braking",
             "Traffic Police Officers",
             "Blocking Traffic Lights",
             "Cutting into Other Vehicle",
@@ -34,7 +32,15 @@ def SceneDescription():
             "Debris on the Road",
             "Narrow Roads",
             "Pedestrians Popping Out",
-            "People on Bus Posters"
+            "People on Bus Posters",
+            "Complex Intersections",
+            "Near Multiple Vehicles",
+            "On Pickup Dropoff",
+            "Turning at Intersection",
+            "Waiting for Traffic Lights",
+            "Emergency Vehicles",
+            "Parking Lot",
+            
         ]
         
         Your output format should be a json object with the following structure:
@@ -50,7 +56,7 @@ def SceneDescription():
                     "Description": "$$description of the object$$"
                 }},
             ]
-            "Scenario Category": $$category most matching the scene$$
+            "Scenario Category": $$category most matching the scene based on the pic you see$$
         }}
         """
     return prompt

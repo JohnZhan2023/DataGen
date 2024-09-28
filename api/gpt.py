@@ -41,11 +41,20 @@ def gpt_4o(img_path, text):
     ENDPOINT = "https://zhaohanggpt4v.openai.azure.com/openai/deployments/gpt4o/chat/completions?api-version=2024-02-15-preview"
 
     # Send request
-    try:
-        response = requests.post(ENDPOINT, headers=headers, json=payload)
-        response.raise_for_status()  # Will raise an HTTPError if the HTTP request returned an unsuccessful status code
-    except requests.RequestException as e:
-        raise SystemExit(f"Failed to make the request. Error: {e}")
+    # retry logic can be added here
+    i = 0
+    # if the time is too long, retry
+    while i<20:
+        try:
+            response = requests.post(ENDPOINT, headers=headers, json=payload, timeout=30)
+            response.raise_for_status()  # Will raise an HTTPError if the HTTP request returned an unsuccessful status code
+            break
+        except requests.RequestException as e:
+            print(f"Failed to make the request. Error: {e}")
+            i += 1
+            print("Retrying...")
+            continue
+    
     # Handle the response as needed (e.g., print or process)
     data = response.json()
     print(data["usage"])
