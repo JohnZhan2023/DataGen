@@ -33,7 +33,7 @@ def data_annotation(index_root, split, data_scale, data_root, new_data_root):
     from map.map import return_map_dic
     all_maps_dic = return_map_dic()
     try:
-        indexes = load_indexes("/public/MARS/datasets/dataGen/pittburg_train")
+        indexes = load_indexes(f"/public/MARS/datasets/dataGen/new_val_{split}")
         # turn the indexes(Datasets) into a list
         indexes = [index for index in indexes]
     except:
@@ -44,8 +44,6 @@ def data_annotation(index_root, split, data_scale, data_root, new_data_root):
     num_data = 0
     print("the length of dataset is ", len(dataset))
     for i, data in enumerate(dataset):
-        # if i != 201 and i !=145:
-        #     continue
         try:
             from transformer4planning.preprocess.nuplan_rasterize import nuplan_rasterize_collate_func
             sample = nuplan_rasterize_collate_func(
@@ -55,7 +53,7 @@ def data_annotation(index_root, split, data_scale, data_root, new_data_root):
             if sample["scenario_type"][0] not in selected_scenario_types:
                 continue
             if file_name == index["file_name"]:
-                if abs(index["frame_id"]-frame_id)<80:
+                if abs(index["frame_id"]-frame_id)<50:
                     continue
                 
             print(f"{sample['scenario_type']} is annotated as the {num_data}th data")
@@ -66,11 +64,11 @@ def data_annotation(index_root, split, data_scale, data_root, new_data_root):
             frame_id = index["frame_id"]
             file_name = index["file_name"]
             img_path = pic_path(data["images_path"])
-
-            if index["map"][0]=="sg-one-north":
-                original_img_path = img_path
-                img_path = flip_image_horizontally(img_path)
-            
+            # if index["map"][0]=="sg-one-north":
+            #     original_img_path = img_path
+            #     print("flip the image")
+            #     img_path = flip_image_horizontally(img_path)
+            print(i, img_path)
 
             save_raster(sample, 0, file_index=i, path_to_save="raster")
             high_res_image_path = os.path.join("/home/sunq/home/jiahaozhan/DataGen/raster", f"test_{i}_0_high_res_raster.jpg")
@@ -88,13 +86,14 @@ def data_annotation(index_root, split, data_scale, data_root, new_data_root):
             hierarchicalPrompt = HierarchicalPlanning(sample["context_actions"], sampled_trajectory)
             meta_actions = gpt_4o(high_res_image_path, hierarchicalPrompt)
             
-            if index["map"][0]=="sg-one-north":
-                delete_image(img_path)
-                img_path = original_img_path
+            # if index["map"][0]=="sg-one-north":
+            #     delete_image(img_path)
+            #     img_path = original_img_path
             ######################################################################################################################
             index["scene_analysis"] = scene_analysis
             index["scene_description"] = scene_description
             index["hierarchical_planning"] = meta_actions
+            print(meta_actions)
                     
             indexes.append(index)
             with open(f"test_data/cache_{i}.txt", "w") as file:
@@ -106,9 +105,9 @@ def data_annotation(index_root, split, data_scale, data_root, new_data_root):
         except Exception as e:
             print(e)
             continue
-        if num_data % 5==0:
+        if num_data % 100==0:
             new_dataset = Dataset.from_list(indexes)
-            new_dataset.save_to_disk(os.path.join(new_data_root, f"pittburg_{split}"))
+            new_dataset.save_to_disk(os.path.join(new_data_root, f"new_val_{split}"))
     
 if __name__ == "__main__":
     random.seed(2024)

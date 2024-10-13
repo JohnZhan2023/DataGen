@@ -23,7 +23,7 @@ def load_dataset(root, split='train', dataset_scale=1, agent_type="all", select=
     # ['train-index_vegas3', 'train-index_singapore', 'train-index_pittsburgh', 'train-index_vegas2', 'train-index_vegas4', 'train-index_vegas5', 'train-index_boston', 'train-index_vegas1', 'train-index_vegas6']
     if debug:
         print(indices)
-        indices = indices[2:3]
+        indices = indices[1:2]
     for index in indices:
         index_path = os.path.join(index_root_folders, index)
         if os.path.isdir(index_path):
@@ -215,6 +215,7 @@ def save_raster(inputs, sample_index, file_index=0,
 
 def pic_path(images_path, num=0):
     root = os.getenv("SENSOR_BLOBS_ROOT")
+    # root = "/public/MARS/datasets/nuPlan/sensor_blobs_val"
     return os.path.join(root, images_path[num])
 
 
@@ -278,9 +279,8 @@ def flip_image_horizontally(image_path):
     """水平翻转图片并返回翻转后的图片路径。"""
     with Image.open(image_path) as img:
         flipped_img = img.transpose(Image.FLIP_LEFT_RIGHT)
-        flipped_img_path = image_path.replace('.jpg', '_flipped.jpg')  # 修改文件名
-        flipped_img.save(flipped_img_path)
-    return flipped_img_path
+        flipped_img.save(image_path)
+    return image_path
 
 def delete_image(image_path):
     """删除指定路径的图片。"""

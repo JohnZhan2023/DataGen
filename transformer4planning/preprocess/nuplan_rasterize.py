@@ -122,11 +122,8 @@ def static_coor_rasterize(sample, data_path, raster_shape=(224, 224),
         if key == 'ego':
             continue
         if frame_id>agent_dic[key]["starting_frame"] and frame_id<agent_dic[key]["ending_frame"]:
-            # print("the shape of other_agent_v:", agent_dic[key]['speed'].shape)
-            # print("the shape of other agent pose:",agent_dic[key]["pose"].shape)
-            # print("frame:", frame_id)
             other_agent_position.append(agent_dic[key]["pose"][(frame_id-agent_dic[key]["starting_frame"]) // frequency_change_rate])
-            if len(agent_dic[key]['speed'])==len(agent_dic[key]['pose']):
+            if agent_dic[key]['speed'].shape[0]!=agent_dic[key]['pose'].shape[0]:
                 other_agent_v.append(agent_dic[key]['speed'][(frame_id) // frequency_change_rate])
             else:
                 other_agent_v.append(agent_dic[key]['speed'][(frame_id-agent_dic[key]["starting_frame"]) // frequency_change_rate])
